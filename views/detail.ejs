@@ -36,8 +36,8 @@
                     <label class="form-label">เลือกผู้รายงาน (Simulation)</label>
                     <select name="user_id" class="form-select" required>
                         <option value="" disabled selected>-- กรุณาเลือกบัญชี --</option>
-                        <% users.forEach(function(user) { %>
-                            <option value="<%= user.id %>"><%= user.name %></option>
+                        <% users.forEach(user => { %>
+                            <option value="<%= user.user_id %>"><%= user.name %></option>
                         <% }); %>
                     </select>
                 </div>

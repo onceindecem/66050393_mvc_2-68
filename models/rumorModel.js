@@ -2,7 +2,7 @@ const db = require('../config/database');
 
 class RumorModel {
     static async getAll() {
-        // พetrieve all rumors with report counts, ordered by most reported first
+        // retrieve all rumors with report counts, ordered by most reported first
         const sql = `
             SELECT r.*, COUNT(rp.report_id) as report_count 
             FROM rumors r 

@@ -1,5 +1,6 @@
 const RumorModel = require("../models/rumorModel");
 const ReportModel = require("../models/reportModel");
+const UserModel = require("../models/userModel");
 
 exports.index = async (req, res) => {
   try {
@@ -22,25 +23,14 @@ exports.detail = async (req, res) => {
 
     const reportCount = await ReportModel.countByRumor(rumorId); // count total reports for this rumor
 
-    // mockup users for simulation
-    const mockUsers = [
-      { id: 1, name: "Somchai (ผู้ใช้ทั่วไป)" },
-      { id: 2, name: "Somsri (ผู้ใช้ทั่วไป)" },
-      { id: 3, name: "John Doe (ผู้ตรวจสอบ)" },
-      { id: 4, name: "Alice (ผู้ใช้ทั่วไป)" },
-      { id: 5, name: "Bob (ผู้ใช้ทั่วไป)" },
-      { id: 6, name: "Charlie (ผู้ใช้ทั่วไป)" },
-      { id: 7, name: "Dave (ผู้ตรวจสอบ)" },
-      { id: 8, name: "Eve (ผู้ใช้ทั่วไป)" },
-      { id: 9, name: "Frank (ผู้ใช้ทั่วไป)" },
-      { id: 10, name: "Grace (ผู้ใช้ทั่วไป)" },
-    ];
+    // retrieve user from DB
+    const users = await UserModel.getAll();
 
     // render 'detail.ejs' view
     res.render("detail", {
       rumor: rumor,
       reportCount: reportCount,
-      users: mockUsers,
+      users: users,
     });
   } catch (err) {
     res.status(500).send(err.message);
@@ -50,35 +40,41 @@ exports.detail = async (req, res) => {
 // process report submission
 exports.report = async (req, res) => {
   try {
-    const { rumor_id, user_id, report_type } = req.body; // get form data
+    // get form data
+    const rumorId = req.body.rumor_id;
+    const userId = req.body.user_id;
+    const type = req.body.report_type;
 
-    // cannot report if already verified
-    const rumor = await RumorModel.getById(rumor_id);
-    if (["verified_true", "verified_false"].includes(rumor.status)) {
-      return res.send(
-        '<script>alert("ข่าวนี้ตรวจสอบแล้ว ห้ามรายงานเพิ่ม"); window.history.back();</script>',
-      );
+    // if select user
+    if (!userId) {
+      return res.send("กรุณาเลือกผู้ใช้งานก่อนรายงาน");
     }
 
     // check if user already reported this rumor
-    const hasReported = await ReportModel.hasUserReported(user_id, rumor_id);
+    const hasReported = await ReportModel.hasUserReported(userId, rumorId);
+
     if (hasReported) {
-      return res.send(
-        '<script>alert("คุณเคยรายงานข่าวนี้แล้ว"); window.history.back();</script>',
-      );
+      return res.send(`
+                <script>
+                    alert("คุณ (User ID: ${userId}) ได้รายงานข่าวนี้ไปแล้ว");
+                    window.location.href = "/detail/${rumorId}";
+                </script>
+            `);
     }
 
     // save report to DB
-    await ReportModel.add(user_id, rumor_id, report_type);
+    await ReportModel.add(userId, rumorId, type);
+
+    const rumor = await RumorModel.getById(rumorId);
 
     // if report >= 10 change status to panic
-    const count = await ReportModel.countByRumor(rumor_id);
+    const count = await ReportModel.countByRumor(rumorId);
     if (count >= 10 && rumor.status === "ปกติ") {
-      await RumorModel.updateStatus(rumor_id, "panic");
+      await RumorModel.updateStatus(rumorId, "panic");
     }
 
     // redirect back to detail page to show updated info
-    res.redirect(`/detail/${rumor_id}`);
+    res.redirect(`/detail/${rumorId}`);
   } catch (err) {
     res.status(500).send(err.message);
   }
@@ -89,7 +85,7 @@ exports.summary = async (req, res) => {
   try {
     const allRumors = await RumorModel.getAll(); // get all rumors data
     const panicRumors = allRumors.filter((r) => r.status === "panic"); // filter only panic
-    const verifiedRumors = allRumors.filter((r) => 
+    const verifiedRumors = allRumors.filter((r) =>
       ["verified_true", "verified_false"].includes(r.status),
     ); // filter only verified rumors
 
