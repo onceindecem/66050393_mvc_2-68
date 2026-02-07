@@ -1,0 +1,33 @@
+<%- include('header') %>
+
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6">
+        <div class="card shadow">
+            <div class="card-header bg-info text-white">
+                <h4 class="mb-0">🔍 ค้นหาข่าวลือ</h4>
+            </div>
+            <div class="card-body">
+                <% if (error) { %>
+                    <div class="alert alert-danger"><%= error %></div>
+                <% } %>
+
+                <form action="/search" method="post">
+                    <div class="mb-3">
+                        <label for="search_id" class="form-label">ระบุรหัสข่าวลือ (Rumor ID)</label>
+                        <input type="text" class="form-control form-control-lg" id="search_id" name="search_id" 
+                               placeholder="เช่น 10000001" required>
+                        <div class="form-text">
+                            ต้องเป็นตัวเลข 8 หลัก และห้ามขึ้นต้นด้วย 0
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 btn-lg">ค้นหา</button>
+                </form>
+            </div>
+        </div>
+        <div class="text-center mt-3">
+            <a href="/" class="text-decoration-none">กลับหน้าหลัก</a>
+        </div>
+    </div>
+</div>
+
+<%- include('footer') %>

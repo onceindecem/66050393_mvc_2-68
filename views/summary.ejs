@@ -1,0 +1,39 @@
+<%- include('header') %>
+
+<h2 class="text-center mb-4">Dashboard สรุปผล</h2>
+<div class="row">
+    <div class="col-md-6">
+        <div class="card border-danger mb-3">
+            <div class="card-header bg-danger text-white">ข่าว Panic (ตื่นตระหนก)</div>
+            <ul class="list-group list-group-flush">
+                <% if (panicRumors.length > 0) { %>
+                    <% panicRumors.forEach(function(p) { %>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <%= p.title %>
+                            <span class="badge bg-danger rounded-pill"><%= p.report_count %> reports</span>
+                        </li>
+                    <% }); %>
+                <% } else { %>
+                    <li class="list-group-item text-muted">ไม่มีข่าว Panic ในขณะนี้</li>
+                <% } %>
+            </ul>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card border-success mb-3">
+            <div class="card-header bg-success text-white">ข่าวที่ตรวจสอบแล้ว</div>
+            <ul class="list-group list-group-flush">
+                <% verifiedRumors.forEach(function(v) { 
+                    let statusText = (v.status == 'verified_true') ? 'ยืนยันว่าเป็นจริง' : 'ยืนยันว่าเป็นเท็จ';
+                %>
+                    <li class="list-group-item">
+                        <strong><%= v.title %></strong><br>
+                        <small class="text-success">ผล: <%= statusText %></small>
+                    </li>
+                <% }); %>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<%- include('footer') %>

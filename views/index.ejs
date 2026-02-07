@@ -1,0 +1,59 @@
+<%- include('header') %>
+
+<h2 class="mb-3">รายการข่าวลือทั้งหมด</h2>
+
+<div class="alert alert-warning">
+    <strong>🔥 เรียงลำดับตามความร้อนแรง</strong> (จำนวนครั้งที่ถูกรายงาน)
+</div>
+
+<table class="table table-bordered bg-white table-hover">
+    <thead class="table-primary">
+        <tr>
+            <th>ID</th>
+            <th>หัวข้อข่าว</th>
+            <th class="text-center">ความน่าเชื่อถือ</th>
+            <th class="text-center">สถานะ</th>
+            <th class="text-center bg-warning bg-opacity-25">จำนวนรายงาน (Heat)</th>
+            <th>จัดการ</th>
+        </tr>
+    </thead>
+    <tbody>
+        <% rumors.forEach(function(r) { 
+            let statusText = r.status;
+            let badgeClass = 'secondary';
+            
+            if (r.status == 'panic') { 
+                statusText = 'Panic'; 
+                badgeClass = 'danger'; 
+            } else if (r.status == 'ปกติ') { 
+                statusText = 'ปกติ'; 
+                badgeClass = 'info text-white';
+            } else if (r.status == 'verified_true') { 
+                statusText = 'ยืนยันว่าเป็นจริง'; 
+                badgeClass = 'success'; 
+            } else if (r.status == 'verified_false') { 
+                statusText = 'ยืนยันว่าเป็นเท็จ'; 
+                badgeClass = 'success'; 
+            }
+
+            let heatClass = r.report_count > 0 ? "text-danger fw-bold" : "text-muted";
+        %>
+        <tr>
+            <td><%= r.rumor_id %></td>
+            <td><%= r.title %></td>
+            <td class="text-center"><%= r.credibility_score %></td>
+            <td class="text-center">
+                <span class="badge bg-<%= badgeClass %>"><%= statusText %></span>
+            </td>
+            <td class="text-center bg-warning bg-opacity-10">
+                <span class="<%= heatClass %>" style="font-size: 1.1em;">
+                    <%= r.report_count %>
+                </span> ครั้ง
+            </td>
+            <td><a href="/detail/<%= r.rumor_id %>" class="btn btn-sm btn-primary">ดู / รายงาน</a></td>
+        </tr>
+        <% }); %>
+    </tbody>
+</table>
+
+<%- include('footer') %>
